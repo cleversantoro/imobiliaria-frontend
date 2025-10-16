@@ -1,0 +1,18 @@
+﻿<section class="space-y-6" *ngIf="params$ | async as params">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900 md:text-3xl dark:text-slate-100">{{ 'admin.propertyEdit.title' | t }}</h1>
+    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+      {{ 'admin.propertyEdit.description' | t }} <strong>{{ params.get('id') }}</strong>.
+    </p>
+  </div>
+  <div class="grid gap-6 md:grid-cols-2">
+    <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ 'admin.propertyEdit.panel.details' | t }}</h2>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ 'admin.propertyEdit.panel.details.subtitle' | t }}</p>
+    </div>
+    <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ 'admin.propertyEdit.panel.settings' | t }}</h2>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ 'admin.propertyEdit.panel.settings.subtitle' | t }}</p>
+    </div>
+  </div>
+</section>

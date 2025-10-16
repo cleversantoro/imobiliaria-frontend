@@ -1,0 +1,76 @@
+﻿<div class="min-h-screen bg-slate-50 text-slate-900 md:grid md:grid-cols-[260px_1fr]">
+  <aside class="hidden flex-col gap-6 bg-surface px-6 py-8 text-slate-100 md:flex">
+    <div>
+      <span class="text-xs uppercase tracking-wider text-brand-light">{{ 'admin.shell.panelLabel' | t }}</span>
+      <h2 class="mt-1 text-2xl font-semibold">{{ 'admin.shell.title' | t }}</h2>
+    </div>
+    <nav class="space-y-2 text-sm font-medium">
+      <a
+        *ngFor="let item of navigation"
+        [routerLink]="item.path"
+        routerLinkActive="bg-white/15 text-white"
+        class="block rounded-lg px-3 py-2 transition-colors hover:bg-white/10"
+      >
+        {{ item.label | t }}
+      </a>
+    </nav>
+    <div class="mt-auto space-y-3 text-sm">
+      <select
+        class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 font-medium text-slate-100 focus:outline-none"
+        [value]="translationService.locale()"
+        (change)="changeLocaleFromEvent($event)"
+        aria-label="Idioma"
+      >
+        <option *ngFor="let option of locales" [value]="option.value">{{ option.label }}</option>
+      </select>
+      <button
+        type="button"
+        class="w-full rounded-lg border border-white/20 px-3 py-2 font-medium text-slate-100 transition hover:border-white"
+        (click)="toggleTheme()"
+      >
+        <span *ngIf="themeService.theme() === 'light'">{{ 'theme.toggle.dark' | t }}</span>
+        <span *ngIf="themeService.theme() === 'dark'">{{ 'theme.toggle.light' | t }}</span>
+      </button>
+    </div>
+  </aside>
+  <section class="min-h-screen bg-slate-50">
+    <div class="border-b border-slate-200 bg-white px-6 py-4 md:hidden">
+      <div class="flex items-center justify-between">
+        <h1 class="text-lg font-semibold">{{ 'admin.shell.mobile' | t }}</h1>
+        <div class="flex items-center gap-3">
+          <select
+            class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm font-medium text-slate-600 focus:outline-none"
+            [value]="translationService.locale()"
+            (change)="changeLocaleFromEvent($event)"
+            aria-label="Idioma"
+          >
+            <option *ngFor="let option of locales" [value]="option.value">{{ option.label }}</option>
+          </select>
+          <button
+            type="button"
+            class="h-9 w-9 rounded-lg border border-slate-300 text-slate-600 transition hover:border-brand hover:text-slate-900"
+            (click)="toggleTheme()"
+          >
+            <svg *ngIf="themeService.theme() === 'light'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 3v1" />
+              <path d="M12 20v1" />
+              <path d="M4.22 4.22l.7.7" />
+              <path d="M19.08 19.08l.7.7" />
+              <path d="M3 12h1" />
+              <path d="M20 12h1" />
+              <path d="M4.22 19.78l.7-.7" />
+              <path d="M19.08 4.92l.7-.7" />
+            </svg>
+            <svg *ngIf="themeService.theme() === 'dark'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="mx-auto max-w-6xl px-4 py-8">
+      <router-outlet />
+    </div>
+  </section>
+</div>

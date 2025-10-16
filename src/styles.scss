@@ -1,0 +1,35 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+  font-family: theme('fontFamily.body');
+}
+
+:root:not([data-theme]),
+:root[data-theme='light'] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --muted: #64748b;
+}
+
+:root[data-theme='dark'] {
+  --background: #0b1120;
+  --foreground: #f8fafc;
+  --card: #111c2e;
+  --muted: #94a3b8;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+  color: inherit;
+}

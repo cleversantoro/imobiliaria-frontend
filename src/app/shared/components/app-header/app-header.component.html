@@ -1,0 +1,118 @@
+﻿<header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
+  <div class="container mx-auto flex items-center justify-between gap-4 py-4">
+    <a routerLink="/" class="flex items-center gap-3 text-xl font-semibold text-slate-900 md:text-2xl dark:text-slate-100">
+      <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand shadow-sm">
+        BI
+      </span>
+      <span class="font-display tracking-tight">{{ 'app.title' | t }}</span>
+    </a>
+
+    <nav class="hidden items-center gap-8 text-sm font-medium text-slate-500 md:flex dark:text-slate-300">
+      <a
+        *ngFor="let item of navigation"
+        [routerLink]="item.path"
+        routerLinkActive="text-slate-900 border-b-2 border-brand dark:text-amber-300"
+        [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+        class="border-b-2 border-transparent pb-2 transition-colors hover:text-slate-900 dark:hover:text-slate-100"
+      >
+        {{ item.label | t }}
+      </a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <select
+        class="hidden rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:border-brand focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 md:block"
+        [value]="translationService.locale()"
+        (change)="changeLocaleFromEvent($event)"
+        aria-label="Idioma"
+      >
+        <option *ngFor="let option of locales" [value]="option.value">{{ option.label }}</option>
+      </select>
+
+      <button
+        type="button"
+        class="hidden h-11 w-11 items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 md:flex dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-500"
+        [attr.aria-label]="themeService.theme() === 'light' ? ('theme.toggle.dark' | t) : ('theme.toggle.light' | t)"
+        (click)="toggleTheme()"
+      >
+        <svg *ngIf="themeService.theme() === 'light'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 3v1" />
+          <path d="M12 20v1" />
+          <path d="M4.22 4.22l.7.7" />
+          <path d="M19.08 19.08l.7.7" />
+          <path d="M3 12h1" />
+          <path d="M20 12h1" />
+          <path d="M4.22 19.78l.7-.7" />
+          <path d="M19.08 4.92l.7-.7" />
+        </svg>
+        <svg *ngIf="themeService.theme() === 'dark'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-300 text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 md:hidden dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-500"
+        aria-label="Menu"
+        (click)="toggleMenu()"
+      >
+        <svg
+          *ngIf="!isMenuOpen()"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          class="h-6 w-6"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        <svg
+          *ngIf="isMenuOpen()"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          class="h-6 w-6"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav *ngIf="isMenuOpen()" class="md:hidden">
+    <div class="space-y-2 border-t border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
+      <div class="flex items-center gap-2">
+        <select
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+          [value]="translationService.locale()"
+          (change)="changeLocaleFromEvent($event)"
+          aria-label="Idioma"
+        >
+          <option *ngFor="let option of locales" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </div>
+      <button
+        type="button"
+        class="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-brand hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:border-brand"
+        (click)="toggleTheme()"
+      >
+        <span *ngIf="themeService.theme() === 'light'">{{ 'theme.toggle.dark' | t }}</span>
+        <span *ngIf="themeService.theme() === 'dark'">{{ 'theme.toggle.light' | t }}</span>
+      </button>
+      <a
+        *ngFor="let item of navigation"
+        [routerLink]="item.path"
+        (click)="closeMenu()"
+        class="block rounded-lg px-3 py-2 text-base font-medium text-slate-600 transition-colors hover:bg-brand/10 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        routerLinkActive="bg-brand/10 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+        [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+      >
+        {{ item.label | t }}
+      </a>
+    </div>
+  </nav>
+</header>
