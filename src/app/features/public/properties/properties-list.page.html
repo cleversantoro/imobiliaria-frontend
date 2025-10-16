@@ -16,6 +16,121 @@
       </button>
     </header>
 
+    <form
+      [formGroup]="filtersForm"
+      (ngSubmit)="applyFilters()"
+      class="space-y-6 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80"
+    >
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.search' | t }}</span>
+          <input
+            formControlName="search"
+            type="text"
+            placeholder="{{ 'properties.filters.search.placeholder' | t : 'Buscar por título ou descrição' }}"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.city' | t }}</span>
+          <input
+            formControlName="city"
+            type="text"
+            placeholder="{{ 'properties.filters.city.placeholder' | t : 'São Paulo' }}"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.neighborhood' | t }}</span>
+          <input
+            formControlName="neighborhood"
+            type="text"
+            placeholder="{{ 'properties.filters.neighborhood.placeholder' | t : 'Bairro' }}"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.type' | t }}</span>
+          <select
+            formControlName="type"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          >
+            <option value="">{{ 'properties.filters.any' | t : 'Qualquer' }}</option>
+            <option *ngFor="let propertyType of propertyTypes" [value]="propertyType">
+              {{ propertyType }}
+            </option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.transaction' | t }}</span>
+          <select
+            formControlName="transaction"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          >
+            <option value="">{{ 'properties.filters.any' | t : 'Qualquer' }}</option>
+            <option *ngFor="let transactionType of transactionTypes" [value]="transactionType">
+              {{ transactionType }}
+            </option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.minPrice' | t }}</span>
+          <input
+            formControlName="minPrice"
+            type="number"
+            min="0"
+            inputmode="decimal"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.maxPrice' | t }}</span>
+          <input
+            formControlName="maxPrice"
+            type="number"
+            min="0"
+            inputmode="decimal"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.bedrooms' | t }}</span>
+          <input
+            formControlName="bedrooms"
+            type="number"
+            min="0"
+            inputmode="numeric"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.bathrooms' | t }}</span>
+          <input
+            formControlName="bathrooms"
+            type="number"
+            min="0"
+            inputmode="numeric"
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </label>
+      </div>
+      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:border-brand"
+          (click)="resetFilters()"
+        >
+          {{ 'properties.filters.reset' | t }}
+        </button>
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-brand-light"
+        >
+          {{ 'properties.filters.apply' | t }}
+        </button>
+      </div>
+    </form>
+
     <div *ngIf="propertyStore.loading()" class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
       {{ 'properties.loading' | t }}
     </div>
