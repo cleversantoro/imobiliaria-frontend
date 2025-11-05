@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -21,7 +21,7 @@ export class PropertiesListPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   protected readonly propertyStore = inject(PropertyStore);
   protected readonly propertyTypes: PropertyType[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial'];
-  protected readonly statusOptions: PropertyStatus[] = ['Disponível', 'Alugado', 'Vendido'];
+  protected readonly statusOptions: PropertyStatus[] = ['Disponivel', 'Alugado', 'Vendido'];
   protected readonly filtersForm = this.fb.group({
     search: [''],
     type: [''],
@@ -110,3 +110,4 @@ export class PropertiesListPage implements OnInit {
     return query;
   }
 }
+

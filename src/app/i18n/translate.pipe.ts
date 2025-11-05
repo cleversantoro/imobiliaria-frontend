@@ -18,7 +18,15 @@ export class TranslatePipe implements PipeTransform {
     });
   }
 
-  transform(key: string, defaultValue?: string): string {
-    return this.translationService.t(key, defaultValue);
+  transform(
+    key: string,
+    arg?: string | Record<string, unknown> | null,
+    params?: Record<string, unknown>,
+  ): string {
+    if (arg && typeof arg === 'object') {
+      return this.translationService.t(key, undefined, arg);
+    }
+
+    return this.translationService.t(key, arg ?? undefined, params);
   }
 }

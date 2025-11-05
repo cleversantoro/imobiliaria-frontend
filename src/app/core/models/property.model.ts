@@ -1,5 +1,5 @@
 export type PropertyType = 'Casa' | 'Apartamento' | 'Terreno' | 'Comercial';
-export type PropertyStatus = 'Disponível' | 'Alugado' | 'Vendido';
+export type PropertyStatus = 'Disponivel' | 'Alugado' | 'Vendido';
 
 export interface PropertyMedia {
   url: string;
@@ -35,3 +35,4 @@ export interface PropertyQuery {
   maxPrice?: number;
   limit?: number;
 }
+

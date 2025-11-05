@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { Property, PropertyMedia, PropertyQuery, PropertyStatus, PropertyType } from '../models/property.model';
@@ -34,6 +34,20 @@ interface FotoResponse {
   descricao: string | null;
 }
 
+interface PropertyPhotosResponse {
+  fotos?: PropertyPhotoResponse[];
+}
+
+interface PropertyPhotoResponse {
+  id?: number;
+  imovel_id?: number;
+  filename?: string;
+  url: string;
+  originalName?: string | null;
+  descricao?: string | null;
+  size?: number;
+}
+
 interface ImovelPayload {
   titulo?: string;
   descricao?: string | null;
@@ -53,7 +67,7 @@ const TYPE_VALUE_TO_LABEL: Record<string, PropertyType> = {
 };
 
 const STATUS_VALUE_TO_LABEL: Record<string, PropertyStatus> = {
-  disponivel: 'Disponível',
+  disponivel: 'Disponivel',
   alugado: 'Alugado',
   vendido: 'Vendido',
 };
@@ -63,6 +77,7 @@ export class PropertyApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.apiBaseUrl;
   private readonly collectionUrl = [this.baseUrl, 'imoveis'].join('/');
+  private readonly assetBaseUrl = this.computeAssetBaseUrl(this.baseUrl);
 
   getProperties(query: PropertyQuery = {}): Observable<Property[]> {
     const params = buildHttpParams(this.mapQueryToParams(query));
@@ -73,9 +88,16 @@ export class PropertyApiService {
   }
 
   getPropertyById(id: string | number): Observable<Property> {
-    return this.http
-      .get<ImovelDetalheResponse>([this.collectionUrl, String(id)].join('/'))
-      .pipe(map((imovel) => this.mapImovelDetalheToProperty(imovel)));
+    const url = [this.collectionUrl, String(id)].join('/');
+    return this.http.get<ImovelDetalheResponse>(url).pipe(
+      switchMap((imovel) => {
+        const property = this.mapImovelDetalheToProperty(imovel);
+        return this.fetchPropertyPhotos(String(id)).pipe(
+          map((photos) => (photos.length ? { ...property, images: photos } : property)),
+          catchError(() => of(property)),
+        );
+      }),
+    );
   }
 
   createProperty(payload: Partial<Property>): Observable<Property> {
@@ -94,6 +116,23 @@ export class PropertyApiService {
 
   deleteProperty(id: string | number): Observable<void> {
     return this.http.delete<void>([this.collectionUrl, String(id)].join('/'));
+  }
+
+  uploadPropertyPhotos(id: string | number, files: File[]): Observable<PropertyMedia[]> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('fotos', file));
+
+    const url = [this.collectionUrl, String(id), 'fotos'].join('/');
+    return this.http.post<PropertyPhotosResponse>(url, formData).pipe(
+      map((response) => this.mapPhotosResponseToMedia(response, String(id))),
+    );
+  }
+
+  private fetchPropertyPhotos(id: string): Observable<PropertyMedia[]> {
+    const url = [this.collectionUrl, id, 'fotos'].join('/');
+    return this.http.get<PropertyPhotosResponse>(url).pipe(
+      map((response) => this.mapPhotosResponseToMedia(response, id)),
+    );
   }
 
   private mapImovelToProperty(imovel: ImovelResponse): Property {
@@ -119,13 +158,12 @@ export class PropertyApiService {
 
   private mapImovelDetalheToProperty(imovel: ImovelDetalheResponse): Property {
     const property = this.mapImovelToProperty(imovel);
-    const images: PropertyMedia[] =
-      imovel.fotos?.map((foto) => ({
-        url: foto.url,
-        alt: foto.descricao ?? property.title,
-      })) ?? [];
+    const images = imovel.fotos?.map((foto) => ({
+      url: this.resolvePhotoUrl(foto.url),
+      alt: foto.descricao ?? property.title,
+    }));
 
-    return { ...property, images };
+    return images?.length ? { ...property, images } : property;
   }
 
   private mapPropertyToPayload(payload: Partial<Property>): ImovelPayload {
@@ -141,7 +179,7 @@ export class PropertyApiService {
     };
   }
 
-  private mapQueryToParams(query: PropertyQuery) {
+  private mapQueryToParams(query: PropertyQuery): Record<string, unknown> {
     return {
       busca: query.search,
       tipo: query.type ? this.normalizeType(query.type) : undefined,
@@ -153,13 +191,60 @@ export class PropertyApiService {
     };
   }
 
+  private mapPhotosResponseToMedia(
+    response: PropertyPhotosResponse | null,
+    fallbackTitle: string,
+  ): PropertyMedia[] {
+    if (!response?.fotos?.length) {
+      return [];
+    }
+
+    return response.fotos
+      .filter((foto) => !!foto?.url)
+      .map((foto) => ({
+        url: this.resolvePhotoUrl(foto.url),
+        alt: foto.descricao ?? foto.originalName ?? fallbackTitle,
+      }));
+  }
+
+  private computeAssetBaseUrl(baseUrl: string): string {
+    try {
+      const parsed = new URL(baseUrl);
+      return parsed.origin.replace(/\/$/, '');
+    } catch {
+      return '';
+    }
+  }
+
+  private resolvePhotoUrl(url: string): string {
+    if (!url) {
+      return url;
+    }
+
+    if (/^(https?:)?\/\//i.test(url)) {
+      return url;
+    }
+
+    if (!this.assetBaseUrl) {
+      return url;
+    }
+
+    if (url.startsWith('/')) {
+      return `${this.assetBaseUrl}${url}`;
+    }
+
+    return `${this.assetBaseUrl}/${url}`;
+  }
+
   private normalizeType(type: Property['type']): string | undefined {
     if (!type) {
       return undefined;
     }
 
     const normalized = String(type).toLowerCase();
-    const inverted = Object.entries(TYPE_VALUE_TO_LABEL).find(([, label]) => label.toLowerCase() === normalized);
+    const inverted = Object.entries(TYPE_VALUE_TO_LABEL).find(
+      ([, label]) => label.toLowerCase() === normalized,
+    );
     if (inverted) {
       return inverted[0];
     }
@@ -173,7 +258,9 @@ export class PropertyApiService {
     }
 
     const normalized = String(status).toLowerCase();
-    const inverted = Object.entries(STATUS_VALUE_TO_LABEL).find(([, label]) => label.toLowerCase() === normalized);
+    const inverted = Object.entries(STATUS_VALUE_TO_LABEL).find(
+      ([, label]) => label.toLowerCase() === normalized,
+    );
     if (inverted) {
       return inverted[0];
     }

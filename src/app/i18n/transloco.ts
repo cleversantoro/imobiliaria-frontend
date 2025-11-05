@@ -1,4 +1,4 @@
-﻿import { APP_INITIALIZER, FactoryProvider, Injectable, Provider, computed, signal, inject } from '@angular/core';
+import { APP_INITIALIZER, FactoryProvider, Injectable, Provider, signal, inject } from '@angular/core';
 
 import { enUS } from './locales/en-US';
 import { ptBR } from './locales/pt-BR';
@@ -35,12 +35,25 @@ export class TranslationService {
     await this.load(locale);
   }
 
-  t(key: string, defaultValue?: string): string {
+  t(key: string, defaultValue?: string, params?: Record<string, unknown>): string {
     const resources = this.dictionary.get(this.localeSignal());
-    if (!resources) {
-      return defaultValue ?? key;
+    const template =
+      resources?.[key] ?? resources?.[key.toLowerCase()] ?? defaultValue ?? key;
+    return this.interpolate(template, params);
+  }
+
+  private interpolate(template: string, params?: Record<string, unknown>): string {
+    if (!params || !template) {
+      return template;
     }
-    return resources[key] ?? resources[key.toLowerCase()] ?? defaultValue ?? key;
+
+    return template.replace(/{{\s*([\w.-]+)\s*}}/g, (match, token) => {
+      const value = params[token];
+      if (value === undefined || value === null) {
+        return match;
+      }
+      return String(value);
+    });
   }
 }
 

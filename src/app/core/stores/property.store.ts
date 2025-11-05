@@ -1,4 +1,4 @@
-﻿import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { PropertyApiService } from '../services/property-api.service';
@@ -63,7 +63,7 @@ export class PropertyStore {
     try {
       const mergedQuery: PropertyQuery = { ...query };
       if (!mergedQuery.status) {
-        mergedQuery.status = 'Disponível';
+        mergedQuery.status = 'Disponivel';
       }
       const properties = await firstValueFrom(this.propertyApi.getProperties(mergedQuery));
       const limit = mergedQuery.limit ?? 6;
@@ -116,3 +116,4 @@ export class PropertyStore {
     }));
   }
 }
+

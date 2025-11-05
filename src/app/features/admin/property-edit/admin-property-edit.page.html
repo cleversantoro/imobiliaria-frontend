@@ -1,18 +1,190 @@
-﻿<section class="space-y-6" *ngIf="params$ | async as params">
-  <div>
-    <h1 class="text-2xl font-semibold text-slate-900 md:text-3xl dark:text-slate-100">{{ 'admin.propertyEdit.title' | t }}</h1>
-    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-      {{ 'admin.propertyEdit.description' | t }} <strong>{{ params.get('id') }}</strong>.
+<section class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-2xl font-semibold text-slate-900 md:text-3xl dark:text-slate-100">
+      {{ 'admin.propertyEdit.title' | t }}
+    </h1>
+    <p class="text-sm text-slate-600 dark:text-slate-300">
+      {{ 'admin.propertyEdit.description' | t }}
     </p>
+  </header>
+
+  <div
+    *ngIf="propertyStore.loading()"
+    class="rounded-3xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300"
+  >
+    {{ 'admin.propertyEdit.loading' | t }}
   </div>
-  <div class="grid gap-6 md:grid-cols-2">
-    <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
-      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ 'admin.propertyEdit.panel.details' | t }}</h2>
-      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ 'admin.propertyEdit.panel.details.subtitle' | t }}</p>
-    </div>
-    <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
-      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ 'admin.propertyEdit.panel.settings' | t }}</h2>
-      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ 'admin.propertyEdit.panel.settings.subtitle' | t }}</p>
-    </div>
+
+  <div
+    *ngIf="propertyStore.error() as error"
+    class="rounded-3xl border border-rose-300 bg-rose-100/70 p-4 text-sm text-rose-700 dark:border-rose-400/40 dark:bg-rose-400/10 dark:text-rose-200"
+  >
+    {{ error || ('admin.propertyEdit.error' | t) }}
   </div>
+
+  <ng-container *ngIf="!propertyStore.loading() && propertyStore.selectedProperty() as property">
+    <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-brand">
+            {{ 'admin.propertyEdit.summary.heading' | t }}
+          </p>
+          <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ property.title }}</h2>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
+            {{ 'admin.propertyEdit.summary.id' | t }}: <span class="font-medium text-slate-900 dark:text-slate-100">{{ property.id }}</span>
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+            {{ property.type }}
+          </span>
+          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+            {{ property.status }}
+          </span>
+          <span class="inline-flex items-center rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
+            {{ property.price | currency:(property.currency || 'BRL'):'symbol':'1.0-0' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <section class="space-y-4 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              {{ 'admin.propertyEdit.photos.title' | t }}
+            </h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300">
+              {{ 'admin.propertyEdit.photos.subtitle' | t }}
+            </p>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {{ property.images?.length || 0 }}/{{ MAX_IMAGES }}
+          </span>
+        </div>
+
+        <ng-container *ngIf="property.images?.length; else noPhotos">
+          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <figure
+              *ngFor="let image of property.images"
+              class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100/70 dark:border-slate-700 dark:bg-slate-800/60"
+            >
+              <img
+                [src]="image.url"
+                [alt]="image.alt || property.title"
+                class="aspect-video w-full object-cover transition duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+              <figcaption
+                *ngIf="image.alt"
+                class="absolute inset-x-0 bottom-0 line-clamp-2 bg-slate-900/60 px-3 py-2 text-xs text-white backdrop-blur"
+              >
+                {{ image.alt }}
+              </figcaption>
+            </figure>
+          </div>
+        </ng-container>
+
+        <ng-template #noPhotos>
+          <div class="flex h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-100/60 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
+            {{ 'admin.propertyEdit.photos.empty' | t }}
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="space-y-4 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            {{ 'admin.propertyEdit.upload.title' | t }}
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
+            {{
+              'admin.propertyEdit.upload.helper' | t : {
+                remaining: getRemainingSlots(property),
+                limit: MAX_IMAGES
+              }
+            }}
+          </p>
+        </div>
+
+        <div
+          *ngIf="hasReachedLimit(property)"
+          class="rounded-2xl border border-amber-300 bg-amber-100/60 px-4 py-3 text-xs text-amber-800 dark:border-amber-400/40 dark:bg-amber-400/10 dark:text-amber-200"
+        >
+          {{ 'admin.propertyEdit.upload.limitReached' | t : { limit: MAX_IMAGES } }}
+        </div>
+
+        <label
+          class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-slate-100/60 px-6 py-10 text-center transition hover:border-brand hover:bg-brand/10 dark:border-slate-600 dark:bg-slate-800/40 dark:hover:border-brand-light dark:hover:bg-brand/20"
+          [class.cursor-not-allowed]="uploading() || hasReachedLimit(property)"
+        >
+          <span class="text-sm font-semibold text-slate-700 dark:text-slate-100">
+            {{ 'admin.propertyEdit.upload.select' | t }}
+          </span>
+          <span class="text-xs text-slate-500 dark:text-slate-300">
+            {{ 'admin.propertyEdit.upload.accept' | t }}
+          </span>
+          <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            multiple
+            class="hidden"
+            (change)="onFilesSelected($event, property)"
+            [disabled]="uploading() || hasReachedLimit(property)"
+          />
+        </label>
+
+        <div *ngIf="selectedFiles().length" class="space-y-2 rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm dark:border-slate-600 dark:bg-slate-800/70">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {{ 'admin.propertyEdit.upload.selected' | t : { count: selectedFiles().length } }}
+          </p>
+          <ul class="space-y-2">
+            <li
+              *ngFor="let file of selectedFiles(); index as index"
+              class="flex items-center justify-between rounded-xl bg-slate-100/70 px-3 py-2 text-xs text-slate-600 dark:bg-slate-700/50 dark:text-slate-200"
+            >
+              <span class="truncate font-medium">{{ file.name }}</span>
+              <button
+                type="button"
+                class="ml-3 text-xs font-semibold uppercase tracking-wide text-rose-600 hover:text-rose-700 dark:text-rose-300 dark:hover:text-rose-200"
+                (click)="removeSelectedFile(index)"
+              >
+                {{ 'admin.propertyEdit.upload.removeFile' | t }}
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div *ngIf="uploadError() as uploadErrorMessage" class="rounded-2xl border border-rose-300 bg-rose-100/60 px-4 py-3 text-xs text-rose-700 dark:border-rose-400/40 dark:bg-rose-400/10 dark:text-rose-200">
+          {{ uploadErrorMessage }}
+        </div>
+
+        <div *ngIf="uploadSuccess() as successMessage" class="rounded-2xl border border-emerald-300 bg-emerald-100/60 px-4 py-3 text-xs text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-400/10 dark:text-emerald-200">
+          {{ successMessage }}
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex w-full items-center justify-center rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-60"
+          (click)="uploadSelectedFiles(property)"
+          [disabled]="!selectedFiles().length || uploading() || hasReachedLimit(property)"
+        >
+          <ng-container *ngIf="uploading(); else uploadLabel">
+            {{ 'admin.propertyEdit.upload.submitting' | t }}
+          </ng-container>
+          <ng-template #uploadLabel>
+            {{ 'admin.propertyEdit.upload.submit' | t }}
+          </ng-template>
+        </button>
+      </section>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!propertyStore.loading() && !propertyStore.error() && !propertyStore.selectedProperty()">
+    <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
+      {{ 'admin.propertyEdit.placeholder' | t }}
+    </div>
+  </ng-container>
 </section>

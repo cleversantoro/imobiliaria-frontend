@@ -1,18 +1,28 @@
 <section class="bg-white dark:bg-slate-900">
   <div class="container mx-auto space-y-6 px-4 py-12 md:py-16">
-    <div *ngIf="propertyStore.loading()" class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
+    <div
+      *ngIf="propertyStore.loading()"
+      class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300"
+    >
       {{ 'property.detail.loading' | t }}
     </div>
 
-    <div *ngIf="propertyStore.error()" class="rounded-3xl border border-slate-200 bg-rose-100/70 p-6 text-center text-sm text-rose-700 dark:border-rose-400/40 dark:bg-rose-400/10 dark:text-rose-200">
+    <div
+      *ngIf="propertyStore.error()"
+      class="rounded-3xl border border-slate-200 bg-rose-100/70 p-6 text-center text-sm text-rose-700 dark:border-rose-400/40 dark:bg-rose-400/10 dark:text-rose-200"
+    >
       {{ propertyStore.error() || ('property.detail.error' | t) }}
     </div>
 
     <ng-container *ngIf="!propertyStore.loading() && !propertyStore.error()">
       <ng-container *ngIf="propertyStore.selectedProperty() as property; else detailPlaceholder">
         <header class="space-y-2">
-          <p class="text-sm font-medium uppercase tracking-wider text-brand">{{ 'property.detail.heading' | t }}</p>
-          <h1 class="text-3xl font-bold text-slate-900 md:text-4xl dark:text-slate-100">{{ property.title }}</h1>
+          <p class="text-sm font-medium uppercase tracking-wider text-brand">
+            {{ 'property.detail.heading' | t }}
+          </p>
+          <h1 class="text-3xl font-bold text-slate-900 md:text-4xl dark:text-slate-100">
+            {{ property.title }}
+          </h1>
           <p class="max-w-2xl text-base text-slate-600 dark:text-slate-300">
             {{ property.description || ('property.detail.description' | t) }}
           </p>
@@ -20,54 +30,135 @@
 
         <div class="grid gap-8 lg:grid-cols-[2fr_1fr]">
           <div class="space-y-6">
-            <div class="aspect-video w-full overflow-hidden rounded-3xl bg-slate-200/70 dark:bg-slate-700/60">
-              <img
-                *ngIf="getPrimaryImage(property) as primaryImage; else detailImagePlaceholder"
-                [src]="primaryImage"
-                [alt]="property.title"
-                class="h-full w-full object-cover"
-              />
-            </div>
-            <div class="grid gap-4 rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
-              <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ 'property.detail.info.title' | t : 'Informações do imóvel' }}</h2>
+            <ng-container *ngIf="property.images as images; else detailImagePlaceholder">
+              <ng-container *ngIf="images.length; else detailImagePlaceholder">
+                <div
+                  class="group relative aspect-video w-full overflow-hidden rounded-3xl bg-slate-200/70 dark:bg-slate-700/60"
+                >
+                  <img
+                    [src]="getImageUrl(images[currentImageIndex()]) ?? ''"
+                    [alt]="images[currentImageIndex()]?.alt || property.title"
+                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+
+                  <button
+                    type="button"
+                    class="absolute left-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-white group-hover:flex dark:bg-slate-800/80 dark:text-slate-100 dark:focus:ring-offset-slate-800"
+                    (click)="previousImage(images.length)"
+                    aria-label="Imagem anterior"
+                  >
+                    <span class="sr-only">Imagem anterior</span>
+                    <span aria-hidden="true">&lsaquo;</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="absolute right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-white group-hover:flex dark:bg-slate-800/80 dark:text-slate-100 dark:focus:ring-offset-slate-800"
+                    (click)="nextImage(images.length)"
+                    aria-label="Proxima imagem"
+                  >
+                    <span class="sr-only">Proxima imagem</span>
+                    <span aria-hidden="true">&rsaquo;</span>
+                  </button>
+
+                  <div
+                    class="absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-full bg-slate-900/60 px-3 py-1 text-xs font-medium text-white backdrop-blur group-hover:flex"
+                    *ngIf="images.length > 1"
+                  >
+                    <span>{{ currentImageIndex() + 1 }}</span>
+                    <span>/</span>
+                    <span>{{ images.length }}</span>
+                  </div>
+                </div>
+
+                <div class="flex gap-3 overflow-x-auto pb-1" *ngIf="images.length > 1">
+                  <button
+                    type="button"
+                    *ngFor="let image of images; index as index"
+                    class="relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-2xl border transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-white dark:border-slate-700 dark:focus:ring-offset-slate-800"
+                    [class.border-brand]="currentImageIndex() === index"
+                    [class.border-slate-200]="currentImageIndex() !== index"
+                    (click)="selectImage(index, images.length)"
+                    [attr.aria-current]="currentImageIndex() === index"
+                  >
+                    <img
+                      [src]="getImageUrl(image) ?? ''"
+                      [alt]="image?.alt || property.title"
+                      class="h-full w-full object-cover"
+                    />
+                    <span
+                      *ngIf="currentImageIndex() === index"
+                      class="absolute inset-0 rounded-2xl ring-2 ring-brand"
+                    ></span>
+                  </button>
+                </div>
+              </ng-container>
+            </ng-container>
+
+            <div
+              class="grid gap-4 rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80"
+            >
+              <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                {{ 'property.detail.info.title' | t : 'Informacoes do imovel' }}
+              </h2>
               <div class="grid gap-3 text-sm text-slate-600 md:grid-cols-2 dark:text-slate-300">
                 <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
-                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <p
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >
                     {{ 'properties.filters.type' | t }}
                   </p>
-                  <p class="text-sm text-slate-700 dark:text-slate-200">{{ property.type }}</p>
+                  <p class="text-sm text-slate-700 dark:text-slate-200">
+                    {{ property.type }}
+                  </p>
                 </div>
                 <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
-                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <p
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >
                     {{ 'properties.filters.status' | t : 'Status' }}
                   </p>
-                  <p class="text-sm text-slate-700 dark:text-slate-200">{{ property.status }}</p>
+                  <p class="text-sm text-slate-700 dark:text-slate-200">
+                    {{ property.status }}
+                  </p>
                 </div>
                 <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
-                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <p
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >
                     {{ 'property.detail.info.category' | t : 'Categoria' }}
                   </p>
                   <p class="text-sm text-slate-700 dark:text-slate-200">
-                    {{ property.category || ('property.detail.info.category.fallback' | t : 'Não informada') }}
+                    {{
+                      property.category
+                        || ('property.detail.info.category.fallback' | t : 'Nao informada')
+                    }}
                   </p>
                 </div>
                 <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
-                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <p
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >
                     {{ 'property.detail.info.createdAt' | t : 'Cadastrado em' }}
                   </p>
                   <p class="text-sm text-slate-700 dark:text-slate-200">
                     <ng-container *ngIf="property.createdAt; else createdAtFallback">
-                      {{ property.createdAt | date:'longDate' }}
+                      {{ property.createdAt | date: 'longDate' }}
                     </ng-container>
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <aside class="space-y-6 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-card backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
+          <aside
+            class="space-y-6 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-card backdrop-blur dark:border-slate-700 dark:bg-slate-800/80"
+          >
             <div class="space-y-2">
-              <p class="text-sm uppercase tracking-wider text-brand">{{ 'property.detail.contact.title' | t }}</p>
-              <h2 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">{{ property.price | currency:(property.currency || 'BRL'):'symbol':'1.0-0' }}</h2>
+              <p class="text-sm uppercase tracking-wider text-brand">
+                {{ 'property.detail.contact.title' | t }}
+              </p>
+              <h2 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                {{ property.price | currency: (property.currency || 'BRL') : 'symbol' : '1.0-0' }}
+              </h2>
               <p class="text-sm text-slate-600 dark:text-slate-300">
                 {{ 'property.detail.contact.subtitle' | t }}
               </p>
@@ -78,7 +169,7 @@
                 </ng-container>
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-300">
-                {{ property.address || ('property.detail.address.fallback' | t : 'Endereço não informado') }}
+                {{ property.address || ('property.detail.address.fallback' | t : 'Endereco nao informado') }}
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-300">
                 {{ property.type }} - {{ property.status }}
@@ -96,20 +187,26 @@
     </ng-container>
 
     <ng-template #detailPlaceholder>
-      <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
+      <div
+        class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300"
+      >
         {{ 'property.detail.meta.fallback' | t }}
       </div>
     </ng-template>
 
     <ng-template #detailImagePlaceholder>
-      <div class="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-300">{{ 'landing.featured.placeholder' | t }}</div>
+      <div
+        class="flex aspect-video w-full items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-100/60 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300"
+      >
+        {{ 'landing.featured.placeholder' | t }}
+      </div>
     </ng-template>
 
     <ng-template #propertyLocationFallback>
-      {{ 'properties.location.fallback' | t : 'Localização não informada' }}
+      {{ 'properties.location.fallback' | t : 'Localizacao nao informada' }}
     </ng-template>
     <ng-template #createdAtFallback>
-      {{ 'property.detail.info.createdAt.fallback' | t : 'Não informado' }}
+      {{ 'property.detail.info.createdAt.fallback' | t : 'Nao informado' }}
     </ng-template>
   </div>
 </section>

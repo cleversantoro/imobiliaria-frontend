@@ -1,4 +1,4 @@
-﻿import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, EffectRef, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -7,7 +7,7 @@ import { SeoService } from '../../../core/services/seo.service';
 import { TranslationService } from '../../../i18n/transloco';
 import { PropertyStore } from '../../../core/stores/property.store';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
-import { Property } from '../../../core/models/property.model';
+import { Property, PropertyMedia } from '../../../core/models/property.model';
 
 @Component({
   selector: 'app-property-detail-page',
@@ -21,6 +21,22 @@ export class PropertyDetailPage implements OnInit, OnDestroy {
   private readonly translation = inject(TranslationService);
   protected readonly propertyStore = inject(PropertyStore);
   private subscription?: Subscription;
+
+  protected readonly currentImageIndex = signal(0);
+
+  private readonly syncImageIndexWithProperty: EffectRef = effect(() => {
+    const property = this.propertyStore.selectedProperty();
+    const images = property?.images ?? [];
+
+    if (!images.length) {
+      this.currentImageIndex.set(0);
+      return;
+    }
+
+    if (this.currentImageIndex() >= images.length) {
+      this.currentImageIndex.set(0);
+    }
+  });
 
   readonly propertyIdParam = this.route.paramMap;
 
@@ -36,21 +52,45 @@ export class PropertyDetailPage implements OnInit, OnDestroy {
       const id = params.get('id');
       if (id) {
         void this.propertyStore.loadProperty(id);
+        this.currentImageIndex.set(0);
       }
     });
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+    this.syncImageIndexWithProperty.destroy();
   }
 
-  protected getPrimaryImage(property: Property): string | null {
-    const images = property.images;
-    if (!images?.length) {
+  protected getImageUrl(image?: PropertyMedia | string | null): string | null {
+    if (!image) {
       return null;
     }
 
-    const [first] = images;
-    return typeof first === 'string' ? first : first.url;
+    return typeof image === 'string' ? image : image.url;
+  }
+
+  protected selectImage(index: number, total: number): void {
+    if (index < 0 || index >= total) {
+      return;
+    }
+
+    this.currentImageIndex.set(index);
+  }
+
+  protected nextImage(total: number): void {
+    if (!total) {
+      return;
+    }
+
+    this.currentImageIndex.update((current) => (current + 1) % total);
+  }
+
+  protected previousImage(total: number): void {
+    if (!total) {
+      return;
+    }
+
+    this.currentImageIndex.update((current) => (current - 1 + total) % total);
   }
 }
