@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.becariniimoveis.com',
+  apiBaseUrl: 'http://backend:3000',
 };
+

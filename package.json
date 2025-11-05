@@ -1,5 +1,5 @@
 {
-  "name": "angular-frontend",
+  "name": "imobiliaria-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:angular-frontend": "node dist/angular-frontend/server/server.mjs"
+    "serve:ssr:imobiliaria-frontend": "node dist/imobiliaria-frontend/server/server.mjs"
   },
   "prettier": {
     "printWidth": 100,
@@ -40,7 +40,7 @@
     "@angular/build": "^20.3.6",
     "@angular/cli": "^20.3.6",
     "@angular/compiler-cli": "^20.3.0",
-    "@angular/localize": "20.3.5",
+    "@angular/localize": "^20.3.6",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
