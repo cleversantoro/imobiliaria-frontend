@@ -23,7 +23,7 @@ export class PropertyStore {
   private readonly loadingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
   private readonly stateSignal = signal<PropertyState>({
-    filters: { page: 1, limit: 12 },
+    filters: { limit: 12 },
     total: 0,
   });
 
@@ -45,9 +45,10 @@ export class PropertyStore {
     this.errorSignal.set(null);
 
     try {
-      const response = await firstValueFrom(this.propertyApi.getProperties(mergedFilters));
-      this.propertiesSignal.set(response.data);
-      this.updateState({ total: response.total, lastUpdated: new Date().toISOString() });
+      const properties = await firstValueFrom(this.propertyApi.getProperties(mergedFilters));
+      const limit = mergedFilters.limit;
+      this.propertiesSignal.set(typeof limit === 'number' ? properties.slice(0, limit) : properties);
+      this.updateState({ total: properties.length, lastUpdated: new Date().toISOString() });
     } catch (error) {
       this.errorSignal.set(extractHttpErrorMessage(error));
     } finally {
@@ -60,10 +61,13 @@ export class PropertyStore {
     this.featuredErrorSignal.set(null);
 
     try {
-      const response = await firstValueFrom(
-        this.propertyApi.getProperties({ ...query, isFeatured: true, limit: query.limit ?? 6 }),
-      );
-      this.featuredPropertiesSignal.set(response.data);
+      const mergedQuery: PropertyQuery = { ...query };
+      if (!mergedQuery.status) {
+        mergedQuery.status = 'Disponível';
+      }
+      const properties = await firstValueFrom(this.propertyApi.getProperties(mergedQuery));
+      const limit = mergedQuery.limit ?? 6;
+      this.featuredPropertiesSignal.set(properties.slice(0, limit));
     } catch (error) {
       this.featuredErrorSignal.set(extractHttpErrorMessage(error));
       this.featuredPropertiesSignal.set([]);
@@ -77,8 +81,8 @@ export class PropertyStore {
     this.errorSignal.set(null);
 
     try {
-      const response = await firstValueFrom(this.propertyApi.getPropertyById(id));
-      this.selectedPropertySignal.set(response.data);
+      const property = await firstValueFrom(this.propertyApi.getPropertyById(id));
+      this.selectedPropertySignal.set(property);
     } catch (error) {
       this.errorSignal.set(extractHttpErrorMessage(error));
     } finally {
@@ -99,7 +103,7 @@ export class PropertyStore {
     this.propertiesSignal.set([]);
     this.selectedPropertySignal.set(null);
     this.featuredPropertiesSignal.set([]);
-    this.updateState({ filters: { page: 1, limit: 12 }, total: 0, lastUpdated: undefined });
+    this.updateState({ filters: { limit: 12 }, total: 0, lastUpdated: undefined });
     this.errorSignal.set(null);
     this.featuredErrorSignal.set(null);
   }

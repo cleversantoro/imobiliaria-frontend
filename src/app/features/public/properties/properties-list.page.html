@@ -1,4 +1,4 @@
-﻿<section class="bg-white dark:bg-slate-900">
+<section class="bg-white dark:bg-slate-900">
   <div class="container mx-auto space-y-10 px-4 py-12 md:py-16">
     <header class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
@@ -21,31 +21,13 @@
       (ngSubmit)="applyFilters()"
       class="space-y-6 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80"
     >
-      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <label class="flex flex-col gap-1 text-sm">
           <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.search' | t }}</span>
           <input
             formControlName="search"
             type="text"
             placeholder="{{ 'properties.filters.search.placeholder' | t : 'Buscar por título ou descrição' }}"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-          />
-        </label>
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.city' | t }}</span>
-          <input
-            formControlName="city"
-            type="text"
-            placeholder="{{ 'properties.filters.city.placeholder' | t : 'São Paulo' }}"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-          />
-        </label>
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.neighborhood' | t }}</span>
-          <input
-            formControlName="neighborhood"
-            type="text"
-            placeholder="{{ 'properties.filters.neighborhood.placeholder' | t : 'Bairro' }}"
             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           />
         </label>
@@ -62,14 +44,14 @@
           </select>
         </label>
         <label class="flex flex-col gap-1 text-sm">
-          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.transaction' | t }}</span>
+          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.status' | t : 'Status' }}</span>
           <select
-            formControlName="transaction"
+            formControlName="status"
             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           >
             <option value="">{{ 'properties.filters.any' | t : 'Qualquer' }}</option>
-            <option *ngFor="let transactionType of transactionTypes" [value]="transactionType">
-              {{ transactionType }}
+            <option *ngFor="let status of statusOptions" [value]="status">
+              {{ status }}
             </option>
           </select>
         </label>
@@ -93,28 +75,9 @@
             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
           />
         </label>
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.bedrooms' | t }}</span>
-          <input
-            formControlName="bedrooms"
-            type="number"
-            min="0"
-            inputmode="numeric"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-          />
-        </label>
-        <label class="flex flex-col gap-1 text-sm">
-          <span class="font-semibold text-slate-700 dark:text-slate-300">{{ 'properties.filters.bathrooms' | t }}</span>
-          <input
-            formControlName="bathrooms"
-            type="number"
-            min="0"
-            inputmode="numeric"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-          />
-        </label>
       </div>
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+
+      <div class="flex flex-col gap-3 pt-2 md:flex-row md:items-center md:justify-end">
         <button
           type="button"
           class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:border-brand"
@@ -124,7 +87,7 @@
         </button>
         <button
           type="submit"
-          class="inline-flex items-center justify-center rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-brand-light"
+          class="inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-brand-light"
         >
           {{ 'properties.filters.apply' | t }}
         </button>
@@ -160,11 +123,17 @@
           <div>
             <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{{ property.title }}</h3>
             <p class="text-sm text-slate-500 dark:text-slate-300">
-              {{ property.neighborhood || property.city }} - {{ property.city }}
+              <ng-container *ngIf="property.city; else locationFallback">
+                {{ property.city }}
+                <span *ngIf="property.state"> - {{ property.state }}</span>
+              </ng-container>
+              <ng-template #locationFallback>
+                {{ 'properties.location.fallback' | t : 'Localização não informada' }}
+              </ng-template>
             </p>
           </div>
           <p class="text-sm text-slate-500 dark:text-slate-300">
-            {{ property.property_type }} - {{ property.transaction_type }}
+            {{ property.type }} - {{ property.status }}
           </p>
           <div class="flex items-center justify-between">
             <p class="text-lg font-semibold text-slate-900 dark:text-slate-100">

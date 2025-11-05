@@ -1,4 +1,4 @@
-﻿<section class="bg-white dark:bg-slate-900">
+<section class="bg-white dark:bg-slate-900">
   <div class="container mx-auto space-y-6 px-4 py-12 md:py-16">
     <div *ngIf="propertyStore.loading()" class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
       {{ 'property.detail.loading' | t }}
@@ -29,13 +29,37 @@
               />
             </div>
             <div class="grid gap-4 rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
-              <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ 'property.detail.features.title' | t }}</h2>
-              <div *ngIf="property.features?.length; else featurePlaceholder" class="grid gap-3 text-sm text-slate-600 md:grid-cols-2 dark:text-slate-300">
-                <div
-                  *ngFor="let feature of property.features"
-                  class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50"
-                >
-                  {{ feature }}
+              <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ 'property.detail.info.title' | t : 'Informações do imóvel' }}</h2>
+              <div class="grid gap-3 text-sm text-slate-600 md:grid-cols-2 dark:text-slate-300">
+                <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {{ 'properties.filters.type' | t }}
+                  </p>
+                  <p class="text-sm text-slate-700 dark:text-slate-200">{{ property.type }}</p>
+                </div>
+                <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {{ 'properties.filters.status' | t : 'Status' }}
+                  </p>
+                  <p class="text-sm text-slate-700 dark:text-slate-200">{{ property.status }}</p>
+                </div>
+                <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {{ 'property.detail.info.category' | t : 'Categoria' }}
+                  </p>
+                  <p class="text-sm text-slate-700 dark:text-slate-200">
+                    {{ property.category || ('property.detail.info.category.fallback' | t : 'Não informada') }}
+                  </p>
+                </div>
+                <div class="rounded-lg bg-slate-100/60 px-4 py-3 dark:bg-slate-700/50">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {{ 'property.detail.info.createdAt' | t : 'Cadastrado em' }}
+                  </p>
+                  <p class="text-sm text-slate-700 dark:text-slate-200">
+                    <ng-container *ngIf="property.createdAt; else createdAtFallback">
+                      {{ property.createdAt | date:'longDate' }}
+                    </ng-container>
+                  </p>
                 </div>
               </div>
             </div>
@@ -48,14 +72,16 @@
                 {{ 'property.detail.contact.subtitle' | t }}
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-300">
-                {{ property.city }} - {{ property.neighborhood || property.address || '-' }}
+                <ng-container *ngIf="property.city; else propertyLocationFallback">
+                  {{ property.city }}
+                  <span *ngIf="property.state"> - {{ property.state }}</span>
+                </ng-container>
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-300">
-                {{ property.property_type }} - {{ property.transaction_type }}
+                {{ property.address || ('property.detail.address.fallback' | t : 'Endereço não informado') }}
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-300">
-                {{ property.bedrooms || 0 }} {{ 'properties-card.bedrooms' | t : 'quartos' }} -
-                {{ property.bathrooms || 0 }} {{ 'properties-card.bathrooms' | t : 'banheiros' }}
+                {{ property.type }} - {{ property.status }}
               </p>
             </div>
             <a
@@ -79,10 +105,11 @@
       <div class="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-300">{{ 'landing.featured.placeholder' | t }}</div>
     </ng-template>
 
-    <ng-template #featurePlaceholder>
-      <div class="rounded-lg bg-slate-100/60 px-4 py-3 text-sm text-slate-600 dark:bg-slate-700/50 dark:text-slate-300">
-        {{ 'property.detail.features.empty' | t }}
-      </div>
+    <ng-template #propertyLocationFallback>
+      {{ 'properties.location.fallback' | t : 'Localização não informada' }}
+    </ng-template>
+    <ng-template #createdAtFallback>
+      {{ 'property.detail.info.createdAt.fallback' | t : 'Não informado' }}
     </ng-template>
   </div>
 </section>

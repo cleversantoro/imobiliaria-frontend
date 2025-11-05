@@ -7,7 +7,7 @@ import { SeoService } from '../../../core/services/seo.service';
 import { TranslationService } from '../../../i18n/transloco';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { PropertyStore } from '../../../core/stores/property.store';
-import { Property, PropertyQuery, PropertyType, TransactionType } from '../../../core/models/property.model';
+import { Property, PropertyQuery, PropertyStatus, PropertyType } from '../../../core/models/property.model';
 
 @Component({
   selector: 'app-properties-list-page',
@@ -20,18 +20,14 @@ export class PropertiesListPage implements OnInit {
   private readonly translation = inject(TranslationService);
   private readonly fb = inject(FormBuilder);
   protected readonly propertyStore = inject(PropertyStore);
-  protected readonly propertyTypes: PropertyType[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
-  protected readonly transactionTypes: TransactionType[] = ['Venda', 'Aluguel'];
+  protected readonly propertyTypes: PropertyType[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial'];
+  protected readonly statusOptions: PropertyStatus[] = ['Disponível', 'Alugado', 'Vendido'];
   protected readonly filtersForm = this.fb.group({
     search: [''],
-    city: [''],
-    neighborhood: [''],
     type: [''],
-    transaction: [''],
+    status: [''],
     minPrice: [''],
     maxPrice: [''],
-    bedrooms: [''],
-    bathrooms: [''],
   });
 
   ngOnInit(): void {
@@ -45,14 +41,10 @@ export class PropertiesListPage implements OnInit {
     const filters = this.propertyStore.filters();
     this.filtersForm.patchValue({
       search: filters.search ?? '',
-      city: filters.city ?? '',
-      neighborhood: filters.neighborhood ?? '',
       type: filters.type ?? '',
-      transaction: filters.transaction ?? '',
+      status: filters.status ?? '',
       minPrice: filters.minPrice?.toString() ?? '',
       maxPrice: filters.maxPrice?.toString() ?? '',
-      bedrooms: filters.bedrooms?.toString() ?? '',
-      bathrooms: filters.bathrooms?.toString() ?? '',
     });
 
     void this.propertyStore.loadProperties();
@@ -64,20 +56,16 @@ export class PropertiesListPage implements OnInit {
 
   applyFilters(): void {
     const query = this.buildQueryFromForm();
-    void this.propertyStore.loadProperties({ page: 1, ...query });
+    void this.propertyStore.loadProperties(query);
   }
 
   resetFilters(): void {
     this.filtersForm.reset({
       search: '',
-      city: '',
-      neighborhood: '',
       type: '',
-      transaction: '',
+      status: '',
       minPrice: '',
       maxPrice: '',
-      bedrooms: '',
-      bathrooms: '',
     });
     this.applyFilters();
   }
@@ -113,14 +101,10 @@ export class PropertiesListPage implements OnInit {
 
     const query: PropertyQuery = {
       search: toStringOrUndefined(formValue.search),
-      city: toStringOrUndefined(formValue.city),
-      neighborhood: toStringOrUndefined(formValue.neighborhood),
       type: toStringOrUndefined(formValue.type),
-      transaction: toStringOrUndefined(formValue.transaction),
+      status: toStringOrUndefined(formValue.status),
       minPrice: toNumberOrUndefined(formValue.minPrice),
       maxPrice: toNumberOrUndefined(formValue.maxPrice),
-      bedrooms: toNumberOrUndefined(formValue.bedrooms),
-      bathrooms: toNumberOrUndefined(formValue.bathrooms),
     };
 
     return query;

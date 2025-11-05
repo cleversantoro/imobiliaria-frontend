@@ -1,5 +1,5 @@
-export type PropertyType = 'Casa' | 'Apartamento' | 'Terreno' | 'Comercial' | 'Rural';
-export type TransactionType = 'Venda' | 'Aluguel';
+export type PropertyType = 'Casa' | 'Apartamento' | 'Terreno' | 'Comercial';
+export type PropertyStatus = 'Disponível' | 'Alugado' | 'Vendido';
 
 export interface PropertyMedia {
   url: string;
@@ -9,42 +9,29 @@ export interface PropertyMedia {
 export interface Property {
   id: number | string;
   title: string;
-  description: string;
+  description?: string | null;
   price: number;
   currency?: string;
-  property_type: PropertyType | string;
-  transaction_type: TransactionType | string;
-  address?: string;
-  neighborhood?: string;
-  city?: string;
-  state?: string;
-  zip_code?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  area?: number;
-  garage_spaces?: number;
-  features?: string[];
-  images?: string[] | PropertyMedia[];
-  is_featured?: boolean;
-  is_active?: boolean;
-  created_at?: string;
-  updated_at?: string;
+  type: PropertyType | string;
+  status: PropertyStatus | string;
+  address?: string | null;
+  cityId?: number | null;
+  city?: string | null;
+  state?: string | null;
+  categoryId?: number | null;
+  category?: string | null;
+  images?: PropertyMedia[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PropertyQuery {
   search?: string;
+  categoryId?: number;
+  cityId?: number;
   type?: string;
-  transaction?: string;
-  city?: string;
-  neighborhood?: string;
+  status?: string;
   minPrice?: number;
   maxPrice?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  minArea?: number;
-  maxArea?: number;
-  page?: number;
   limit?: number;
-  isFeatured?: boolean;
-  isActive?: boolean;
 }

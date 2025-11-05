@@ -15,10 +15,10 @@ export class AdminPropertiesPage implements OnInit {
   protected readonly propertyStore = inject(PropertyStore);
 
   ngOnInit(): void {
-    void this.propertyStore.loadProperties({ page: 1, limit: 20 });
+    void this.propertyStore.loadProperties({ limit: 20 });
   }
 
   refresh(): void {
-    void this.propertyStore.loadProperties({ ...this.propertyStore.filters(), page: 1 });
+    void this.propertyStore.loadProperties({ ...this.propertyStore.filters() });
   }
 }
