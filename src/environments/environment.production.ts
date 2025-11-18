@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://backend:3000/api',
+  apiBaseUrl: 'http://becarini.com.br/api',
 };
 
